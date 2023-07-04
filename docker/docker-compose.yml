@@ -1,0 +1,89 @@
+# Use postgres/example user/password credentials
+version: '3.8'
+
+services:
+  postgres:
+    container_name: postgres
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    # image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgresmdp
+      POSTGRES_DB: mypostgres
+      # POSTGRES_USER: postgresuser
+    # env_file:
+    #   - .env
+    networks:
+     - transcendence_network
+    ports:
+      - "5432:5432"
+    volumes:
+      - bdd:/var/lib/postgresql/data
+  nestjs:
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+    container_name: nest-backend
+    build:
+      context: ./docker/backend
+      dockerfile: Dockerfile
+      # Only will build development stage from our dockerfile
+      target: development
+    # Run a command against the development stage of the image
+    command: npm run start:dev
+    # env_file:
+    #   - .env
+    networks:
+     - transcendence_network
+    ports:
+      - 3000:3000
+    # volumes:
+    #   - ./nest-template:/usr/src/app
+  # nextjs:
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+  #   container_name: next-frontend
+  #   build:
+  #     context: ./docker/frontend
+  #     dockerfile: Dockerfile
+    # env_file:
+    #   - .env
+    # networks:
+    #  - transcendence_network
+  #   ports:
+  #     - 3001:3001
+  #   volumes:
+  #     - nextjs:/usr/src/app
+    # env_file:
+    #   - .env
+
+networks:
+  transcendence_network:
+   name: transcendence_network
+   driver: bridge
+
+volumes:
+  bdd:
+    driver: local # default local = /var/lib/docker/volumes but in school its /goinfre/chillion/docker/volumes/
+    name: postgres # volume name = /goinfre/chillion/docker/volumes/postgres
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+
+  # doc : https://hub.docker.com/_/postgres
+  # POSTGRES_USER
+  # POSTGRES_PASSWORD
+  # POSTGRES_DB - default DB Name POSTGRES_USER
+  # POSTGRES_INITDB_ARGS - Facultatif - permet l'envoie d'arguments a postgres initdb ex : -e POSTGRES_INITDB_ARGS="--data-checksums"
+  # POSTGRES_INITDB_WALDIR - Facultatif - permet de definir un autre emplacement du journal des transactions - default in subfolder PGDATA
+  # POSTGRES_HOST_AUTH_METHOD - Facultatif - permet de controler les auth-method connexions host, bases, users et adresses - default scram-sha-256 - in no init db echo "host all all all $POSTGRES_HOST_AUTH_METHOD" >> pg_hba.conf
+  # PGDATA - Facultatif - define another location - like a subdirectory - for the database files - Default /var/lib/postgresql/data
+  # ex : docker run -d --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e PGDATA=/var/lib/postgresql/data/pgdata -v /custom/mount:/var/lib/postgresql/data postgres
+
+
