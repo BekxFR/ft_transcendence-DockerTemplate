@@ -4,6 +4,8 @@
 
 FROM node:18-alpine As development
 
+RUN apk add --no-cache libc6-compat vim
+
 RUN npm install -g npm@latest
 
 # Create app directory
@@ -14,7 +16,7 @@ RUN chown -R node:node /usr/src/app
 # Copy application dependency manifests to the container image.
 # A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
 # Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node ./nest-template/package*.json ./
 # COPY package*.json ./
 
 # Install app dependencies using the `npm ci` command instead of `npm install`
@@ -32,11 +34,13 @@ USER node
 
 FROM node:18-alpine As build
 
+RUN apk add --no-cache libc6-compat
+
 RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node ./nest-template/package*.json ./
 
 # In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
@@ -59,6 +63,8 @@ USER node
 ###################
 
 FROM node:18-alpine As production
+
+RUN apk add --no-cache libc6-compat
 
 RUN npm install -g npm@latest
 

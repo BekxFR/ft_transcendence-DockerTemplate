@@ -41,22 +41,24 @@ services:
       - 3000:3000
     # volumes:
     #   - ./nest-template:/usr/src/app
-  # nextjs:
+  nextjs:
     # depends_on:
     #   postgres:
     #     condition: service_healthy
-  #   container_name: next-frontend
-  #   build:
-  #     context: ./docker/frontend
-  #     dockerfile: Dockerfile
+    container_name: next-frontend
+    build:
+      context: ./docker/frontend
+      dockerfile: Dockerfile
+      target: other
+    command: npm run dev
     # env_file:
     #   - .env
-    # networks:
-    #  - transcendence_network
-  #   ports:
-  #     - 3001:3001
-  #   volumes:
-  #     - nextjs:/usr/src/app
+    networks:
+     - transcendence_network
+    ports:
+      - 3001:3001
+    # volumes:
+    #   - nextjs:/usr/src/app
     # env_file:
     #   - .env
 
