@@ -10,9 +10,9 @@ services:
     # image: postgres:latest
     restart: always
     environment:
-      POSTGRES_PASSWORD: postgresmdp
-      POSTGRES_DB: mypostgres
-      # POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres1
+      POSTGRES_USER: postgres
     # env_file:
     #   - .env
     networks:
