@@ -13,6 +13,12 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres1
       POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres1 -h postgres -p 5432"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
     # env_file:
     #   - .env
     networks:
@@ -22,9 +28,9 @@ services:
     volumes:
       - bdd:/var/lib/postgresql/data
   nestjs:
-    # depends_on:
-    #   postgres:
-    #     condition: service_healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
     container_name: nest-backend
     build:
       context: ./docker/backend
@@ -32,7 +38,13 @@ services:
       # Only will build development stage from our dockerfile
       target: development
     # Run a command against the development stage of the image
-    command: npm run start:dev
+    command: 
+      - /bin/sh
+      - -c
+      - | 
+        npx prisma migrate dev --name init
+        npx prisma generate
+        npm run start:dev
     # env_file:
     #   - .env
     networks:
@@ -42,9 +54,9 @@ services:
     # volumes:
     #   - ./nest-template:/usr/src/app
   nextjs:
-    # depends_on:
-    #   postgres:
-    #     condition: service_healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
     container_name: next-frontend
     build:
       context: ./docker/frontend
@@ -87,5 +99,5 @@ volumes:
   # POSTGRES_HOST_AUTH_METHOD - Facultatif - permet de controler les auth-method connexions host, bases, users et adresses - default scram-sha-256 - in no init db echo "host all all all $POSTGRES_HOST_AUTH_METHOD" >> pg_hba.conf
   # PGDATA - Facultatif - define another location - like a subdirectory - for the database files - Default /var/lib/postgresql/data
   # ex : docker run -d --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e PGDATA=/var/lib/postgresql/data/pgdata -v /custom/mount:/var/lib/postgresql/data postgres
-
+  # variables d'environnement postgres : https://www.postgresql.org/docs/14/libpq-envars.html
 

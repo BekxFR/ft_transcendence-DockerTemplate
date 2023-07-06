@@ -11,6 +11,7 @@ RUN npm install -g npm@latest
 # Create app directory
 WORKDIR /usr/src/app
 
+
 RUN chown -R node:node /usr/src/app
 
 # Copy application dependency manifests to the container image.
@@ -19,6 +20,8 @@ RUN chown -R node:node /usr/src/app
 COPY --chown=node:node ./nest-template/package*.json ./
 # COPY package*.json ./
 
+USER node
+
 # Install app dependencies using the `npm ci` command instead of `npm install`
 RUN npm ci
 
@@ -26,7 +29,8 @@ RUN npm ci
 COPY --chown=node:node ./nest-template .
 
 # Use the node user from the image (instead of the root user)
-USER node
+
+# RUN npx prisma generate
 
 ###################
 # BUILD FOR PRODUCTION
@@ -55,6 +59,7 @@ ENV NODE_ENV production
 
 # Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
 RUN npm ci --only=production && npm cache clean --force
+
 
 USER node
 

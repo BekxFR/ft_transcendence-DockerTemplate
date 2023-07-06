@@ -77,9 +77,12 @@ COPY --chown=node:node --from=builder /usr/src/app/package.json ./package.json
 COPY --chown=node:node --from=builder /usr/src/app/.next ./.next
 
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
+# verify if this line is necessary !!!
 
 USER node
 
 EXPOSE 3001
 
 CMD ["npm", "start"]
+# CMD ["node", "server.js"]
+# maybe better start value ??
