@@ -15,7 +15,7 @@ interface Item {
 	useEffect(() => {
 	  const fetchData = async () => {
 		try {
-		  const response = await fetch('http://localhost:3000/test');
+		  const response = await fetch('/test');
 		  const responseData = await response.json();
 		  setData(responseData);
 		  console.log(responseData);

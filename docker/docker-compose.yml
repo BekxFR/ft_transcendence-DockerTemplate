@@ -31,14 +31,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    container_name: nest-backend
+    container_name: nest_backend
     build:
       context: ./docker/backend
       dockerfile: Dockerfile
       # Only will build development stage from our dockerfile
       target: development
     # Run a command against the development stage of the image
-    command: /bin/sh /usr/src/app/entry_point_server.sh
+    command: 
+      - /bin/sh
+      - -c
+      - | 
+        npx prisma migrate dev --name init
+        npx prisma generate
+        npm run start:dev
     # env_file:
     #   - .env
     networks:
@@ -51,7 +57,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    container_name: next-frontend
+    container_name: next_frontend
     build:
       context: ./docker/frontend
       dockerfile: Dockerfile
@@ -60,18 +66,30 @@ services:
     # env_file:
     #   - .env
     networks:
-     - transcendence_network
+      - transcendence_network
     ports:
       - 3001:3001
     # volumes:
     #   - nextjs:/usr/src/app
     # env_file:
     #   - .env
+  nginx:
+    container_name: nginx
+    depends_on:
+      - nestjs
+      - nextjs
+    build:
+      context: ./docker/nginx/
+      dockerfile: Dockerfile
+    networks:
+      - transcendence_network
+    ports:
+      - 8080:8080
 
 networks:
   transcendence_network:
-   name: transcendence_network
-   driver: bridge
+    name: transcendence_network
+    driver: bridge
 
 volumes:
   bdd:
